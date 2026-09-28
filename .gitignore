@@ -18,3 +18,16 @@ npm-debug.log*
 # OS
 .DS_Store
 Thumbs.db
+
+# IDE / AI assistant files (not project code)
+AGENTS.md
+CLAUDE.md
+
+# Next.js boilerplate files we don't use
+frontend/src/app/page.module.css
+frontend/public/file.svg
+frontend/public/globe.svg
+frontend/public/next.svg
+frontend/public/vercel.svg
+frontend/public/window.svg
+frontend/README.md
