@@ -1,0 +1,83 @@
+// This is your Prisma schema file
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  AGENT
+  MANAGER
+}
+
+enum LeadStatus {
+  OPEN
+  CLOSED
+}
+
+enum BeneficiaryType {
+  USER
+  COMPANY
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  role      Role
+  managerId String?
+
+  manager   User?    @relation("UserManager", fields: [managerId], references: [id])
+  reports   User[]   @relation("UserManager")
+
+  leads     Lead[]   @relation("AssignedLeads")
+  commissions CommissionLedger[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([managerId])
+  @@index([email])
+}
+
+model Lead {
+  id             String     @id @default(uuid())
+  title          String
+  customerName   String
+  revenue        Decimal    @db.Decimal(15, 2)
+  status         LeadStatus @default(OPEN)
+  assignedUserId String?
+
+  assignedUser   User?      @relation("AssignedLeads", fields: [assignedUserId], references: [id])
+  commissions    CommissionLedger[]
+
+  closedAt  DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([status])
+  @@index([assignedUserId])
+}
+
+model CommissionLedger {
+  id              String          @id @default(uuid())
+  leadId          String
+  userId          String?
+  beneficiaryType BeneficiaryType
+  level           Int?
+  percentage      Decimal         @db.Decimal(8, 4)
+  amount          Decimal         @db.Decimal(15, 2)
+
+  lead   Lead  @relation(fields: [leadId], references: [id])
+  user   User? @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  // Prevent duplicate commission records for same lead and distribution level
+  @@unique([leadId, level], name: "unique_lead_level")
+  @@index([leadId])
+  @@index([userId])
+}
