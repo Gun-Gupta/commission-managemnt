@@ -7,9 +7,6 @@ node_modules/
 .env.example
 .env.*.local
 
-# Prisma
-prisma/migrations/
-
 # Logs
 logs/
 *.log
